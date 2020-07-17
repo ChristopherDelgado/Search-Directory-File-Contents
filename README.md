@@ -6,4 +6,4 @@ Directory, file extension, your desired search
 So for instance, if we wanted to search our .java files for a comment like '//Bug' in directory C:\Users\name\programs, we would input the following:
 # C:\Users\name\programs, .java, //Bug
 # Currently Supported files
-As of now directory_search.py can search through .java, .py, and .txt file extensions.
+As of now directory_search.py can search through .java, .py, .txt, and .docx file extensions.
