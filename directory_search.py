@@ -1,7 +1,8 @@
 # importing os to allow for directory changes
 import os
+import docx
 
-def search_directory(dir, filetype, search) -> list:
+def search_directory(dir, filetype, search, specific = 1) -> list:
     """Search files in the given directory with the given file extension for the desired search criteria"""
     # change directory to the given directory
     os.chdir(dir)
@@ -13,37 +14,76 @@ def search_directory(dir, filetype, search) -> list:
         for file in os.listdir(os.getcwd()):
             if file.endswith(filetype):
                 # retrieve all instances of the search criteria in the file and append to list
-                files_with_search.append(get_instances(file, search))
+                temp_list = get_instances(file, search, specific)
+                if temp_list is not None:
+                    files_with_search.append(temp_list)
     except Exception as e:
         raise e
         print('No Files Found')
     return files_with_search
 
 
-def get_instances(file, search) -> list:
+def get_instances(file, search, specific) -> list:
     """Return all instances of the search criteria found in the given file in a list where [0] is the file's name"""
     # save the files name before modifying it into a read file
     file_name = file
     # retrieve full directory of the file
     directory = os.getcwd() + '\\' + file
-    # open the file for reading
-    file = open(directory, 'r')
-    file = file.read()
+    # handle different file types accordingly
+    if file.endswith('.docx'):
+        # handle .docx extension
+        file = docx.Document(directory)
+        temp = ''
+        for p in file.paragraphs:
+            temp += (r'%s' % p.text) + '\n'
+        file = temp
+        end_character = '.'
+    else:
+        # open the file for reading
+        file = open(directory, 'r')
+        file = file.read()
+        end_character = '\n'
+    # check if the file holds the desired search criteria
     if file.__contains__(search):
         this_file_todo = [file_name]
-        while file.__contains__(search):
-            # store index where search is found
-            start_index = file.find(search)
-            # update file seek location
-            temp_file = file[start_index:-1]
-            # store newline character index
-            end_index = temp_file.find('\n')
-            if end_index >= 0:
-                end_index += start_index
-            # append the search to the list and update file seek
-            this_file_todo.append('...' + file[start_index:end_index] + '...')
-            file = file[end_index:-1]
-        return this_file_todo
+        if specific == 0:
+            while file.__contains__(search):
+                # store index where search is found
+                start_index = file.find(search)
+                # update file seek location
+                temp_file = file[start_index:-1]
+                # store newline character index
+                end_index = temp_file.find(end_character)
+                # if end_index is found as a positive integer add the start index to it
+                if end_index >= 0:
+                    end_index += start_index
+                # append the search to the list and update file seek
+                this_file_todo.append('...' + file[start_index:end_index] + '...')
+                file = file[end_index:-1]
+            return this_file_todo
+        else:
+            while file.__contains__(search):
+                # store index where search is found
+                start_index = file.find(search)
+                # making sure result is exact match
+                temp_exact_file = file[start_index:-1]
+                temp_end_index = temp_exact_file.find(' ') + start_index
+                temp_result = file[start_index:temp_end_index]
+                if search.__eq__(temp_result):
+                    # update file seek location
+                    temp_file = file[start_index:-1]
+                    # store newline character index
+                    end_index = temp_file.find(end_character)
+                    # if end_index is found as a positive integer add the start index to it
+                    if end_index >= 0:
+                        end_index += start_index
+                    # append the search to the list and update file seek
+                    this_file_todo.append('...' + file[start_index:end_index] + '...')
+                    file = file[end_index:-1]
+                else:
+                    file = file[temp_end_index:-1]
+            return this_file_todo
+
     return None
 
 
@@ -55,14 +95,3 @@ def print_results(double_list, search):
             print(list[index])
         input('\npress ENTER for the next file\n')
 
-while True:
-    m_input = input("Enter directory, .file extension, and search in that format\n")
-    m_input = m_input.split(',')
-    for i in range(0, len(m_input)):
-        m_input[i] = m_input[i].strip()
-    print_results(search_directory(m_input[0], m_input[1], m_input[2]), m_input[2])
-    m_option = input('Would you like to search another directory?\n')
-    if m_option.lower().__eq__('yes'):
-        continue
-    else:
-        break
