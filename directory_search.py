@@ -2,7 +2,8 @@
 import os
 import docx
 
-def search_directory(dir, filetype, search, specific = 1) -> list:
+
+def search_directory(dir, filetype, search, specific=1) -> list:
     """Search files in the given directory with the given file extension for the desired search criteria"""
     # change directory to the given directory
     os.chdir(dir)
@@ -95,3 +96,23 @@ def print_results(double_list, search):
             print(list[index])
         input('\npress ENTER for the next file\n')
 
+
+def start():
+    """Starts the search program"""
+    # run the program until the user quits
+    while True:
+        # retrieve input from the user
+        m_input = input("Enter directory, .file extension, search, and specific in that format\n")
+        # split the input into a list
+        m_input = m_input.split(',')
+        # remove any leading and trailing white spaces from all inputs
+        for i in range(0, len(m_input)):
+            m_input[i] = m_input[i].strip()
+        # retrieve the files and print the data
+        print_results(search_directory(m_input[0], m_input[1], m_input[2], m_input[3]), m_input[2])
+        # ask if the user would like to search another directory
+        m_option = input('Would you like to search another directory?\n')
+        if m_option.lower().__eq__('yes'):
+            continue
+        else:
+            break
